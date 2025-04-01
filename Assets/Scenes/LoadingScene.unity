@@ -663,7 +663,7 @@ MonoBehaviour:
   Loadingbar_front: {fileID: 216673768}
   Tip1: {fileID: 1806039706}
   Tip2: {fileID: 1933505193}
-  sceneName: StartScene
+  sceneName: LobbyScene
 --- !u!4 &888500666
 Transform:
   m_ObjectHideFlags: 0
@@ -991,7 +991,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Tip2: '
+  m_Text: "Tip2: \uC8FC\uC778\uACF5\uC758 \uC2E0\uCCB4\uB294 \uC791\uC2B5\uB2C8\uB2E4."
 --- !u!222 &1933505196
 CanvasRenderer:
   m_ObjectHideFlags: 0

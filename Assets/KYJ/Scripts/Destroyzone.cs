@@ -16,4 +16,16 @@ public class Destroyzone : MonoBehaviour
     {
         
     }
+
+    void OnTriggerEnter2D(Collider2D other) 
+    {
+        if (other.gameObject.CompareTag("EnemyBullet"))
+        {
+            Destroy(other.gameObject);
+        }
+        else if(other.gameObject.CompareTag("PlayerBullet"))
+        {
+            Destroy(other.gameObject);
+        }
+    }
 }

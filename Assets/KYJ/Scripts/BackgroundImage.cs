@@ -5,7 +5,7 @@ using UnityEngine;
 public class BackgroundImage : MonoBehaviour
 {
     float width;
-    float speed;
+    public float speed;
     BoxCollider2D collider2D;
 
 
@@ -14,7 +14,7 @@ public class BackgroundImage : MonoBehaviour
     {
         collider2D = GetComponent<BoxCollider2D>();
         width = collider2D.size.x;
-        speed = 30.0f;
+        speed = 5.0f;
     }
 
     // Update is called once per frame
