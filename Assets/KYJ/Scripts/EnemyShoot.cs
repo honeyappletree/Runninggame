@@ -18,17 +18,16 @@ public class EnemyShoot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        EnemyFire();
+        //EnemyFire();
     }
 
     void EnemyFire()
     {
-        coolTime += Time.deltaTime;
-        if(coolTime > 2f)
-        {
+        
+        
             GameObject bullet = Instantiate(EnemyBullet);
             bullet.transform.position = Ebullet_position.transform.position;
-            coolTime = 0;
-        }
+        
+        
     }
 }

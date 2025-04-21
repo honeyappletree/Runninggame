@@ -19,8 +19,14 @@ public class PlayerController : MonoBehaviour
     int currentHp;
     int maxHp = 5;
     int bulletDamage = 1;
-    public GameObject[] Life;
+    public Image[] Life;
     public GameObject GameOverobject;
+    Rigidbody2D rigid;
+    bool isJumping = false;
+    public float jumpPower = 10;
+    int jumpCount = 0;
+    bool onGround = true;
+    bool isInvincible = false;
 
     // Start is called before the first frame update
     void Start()
@@ -33,6 +39,7 @@ public class PlayerController : MonoBehaviour
         bullet_position = transform.Find("bullet_position");
         currentHp = maxHp;
         GameOverobject.SetActive(false);
+        rigid = GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
@@ -40,12 +47,26 @@ public class PlayerController : MonoBehaviour
     {
         Move();
         PBullet();
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+
+            if (jumpCount < 2)
+            {
+                rigid.velocity = Vector2.up * jumpPower;
+                isJumping = true;
+                onGround = false;
+                jumpCount++;
+                Debug.Log("점프");
+            }
+        }
     }
 
     void Move() //플레이어 이동
     {
+        float x = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
         float y = Input.GetAxis("Vertical") * speed * Time.deltaTime;
-        transform.Translate(new Vector3(0, y, 0));
+
+        transform.Translate(x, y, 0);
 
         float moveX = Mathf.Clamp(transform.position.x, -21.47f, 57.5f); //이동 범위 제한(x축)
         float moveY = Mathf.Clamp(transform.position.y, -20.3f, 16.2f); //이동 범위 제한(y축)
@@ -63,25 +84,36 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Stop()
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isJumping = false;
+            onGround = true;
+            jumpCount = 0;
+        }
+
+    }
+
+    void Stop() //일시정지
     {
         Pause.SetActive(true);
         Time.timeScale = 0f;
     }
 
-    void Resume()
+    void Resume() //계속하기
     {
         Pause.SetActive(false);
         Time.timeScale = 1f;
     }
 
-    void Retry()
+    void Retry() //다시하기
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("StartScene");
     }
 
-    void Quit()
+    void Quit() //그만하기
     {
         SceneManager.LoadScene("StartScene");
         Time.timeScale = 1f;
@@ -93,7 +125,8 @@ public class PlayerController : MonoBehaviour
         {
             Destroy(other.gameObject);
             currentHp -= bulletDamage;
-            Life[currentHp].SetActive(false);
+            Life[currentHp].color = new Color(0.3018868f, 0.3018868f, 0.3018868f, 1);
+
             Debug.Log("currentHp: " + currentHp);
 
             if(currentHp == 0)

@@ -4,37 +4,20 @@ using UnityEngine;
 
 public class BackgroundImage : MonoBehaviour
 {
-    float width;
-    public float speed;
-    BoxCollider2D collider2D;
+    public float speed = 20f;
+    float repeatDistance; //배경이 반복되는 거리
+    Vector2 startPosition; //배경의 초기 위치
+    float newPosition; //배경의 새로운 위치 계산
 
-
-    // Start is called before the first frame update
     void Start()
     {
-        collider2D = GetComponent<BoxCollider2D>();
-        width = collider2D.size.x;
-        speed = 5.0f;
+        startPosition = transform.position;
+        repeatDistance = GetComponent<SpriteRenderer>().bounds.size.x;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        ImageMove();
-        if (transform.position.x <= -140.0f)
-        {
-            Reposition();
-        }
-    }
-
-    void ImageMove()
-    {
-        transform.Translate(Vector3.left * speed * Time.deltaTime);
-    }
-
-    void Reposition()
-    {
-        Vector3 offset = new Vector3(width * 420f, 0, 0);
-        transform.position = transform.position + offset;
+        newPosition = Mathf.Repeat(Time.time * speed, repeatDistance);
+        transform.position = startPosition + Vector2.left * newPosition;
     }
 }

@@ -18,6 +18,7 @@ public class Loading : MonoBehaviour
     {
         Tip2.SetActive(false);
         StartCoroutine(SceneCoroutine());
+        Invoke("TipChange", 1f);
     }
 
     IEnumerator SceneCoroutine()
@@ -32,7 +33,7 @@ public class Loading : MonoBehaviour
             op.allowSceneActivation = false;
 
             float timer = 0;
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(0.3f);
             while (!op.isDone)
             {
                 
@@ -56,16 +57,17 @@ public class Loading : MonoBehaviour
                         SceneManager.LoadSceneAsync(sceneName);
                         Debug.Log("timer: " + timer);
                     }
-                    
+
                 }
-                yield return new WaitForSeconds(0.5f);
-                Tip1.SetActive(false);
-                Tip2.SetActive(true);
+                yield return new WaitForSeconds(0.2f);
                 yield return null;
             }
-
-
         }
+    }
+    void TipChange()
+    {
+        Tip1.SetActive(false);
+        Tip2.SetActive(true);
     }
 }
 
