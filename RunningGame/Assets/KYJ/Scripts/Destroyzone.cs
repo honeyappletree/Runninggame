@@ -23,9 +23,5 @@ public class Destroyzone : MonoBehaviour
         {
             Destroy(other.gameObject);
         }
-        else if(other.gameObject.CompareTag("PlayerBullet"))
-        {
-            other.gameObject.SetActive(false);
-        }
     }
 }

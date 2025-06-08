@@ -18,4 +18,18 @@ public class PlayerBullet : MonoBehaviour
         transform.Translate(Vector3.right * speed * Time.deltaTime);
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Destroyzone"))
+        {
+            PBulletPool.ReturnBullet(this);
+            Debug.Log("ÅºÈ¯ ¹ÝÈ¯");
+        }
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            PBulletPool.ReturnBullet(this);
+            Debug.Log("ÅºÈ¯ ¹ÝÈ¯");
+        }
+    }
+
 }

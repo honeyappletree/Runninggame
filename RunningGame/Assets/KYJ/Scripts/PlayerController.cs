@@ -29,7 +29,6 @@ public class PlayerController : MonoBehaviour
     bool isInvincible = false;
     SpriteRenderer sprite;
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -83,14 +82,14 @@ public class PlayerController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Space))
         {
             Debug.Log("ÃÑ¾Ë ¹ß»ç!");
-            GameObject bullet = Instantiate(Player_bullet);
+            var bullet = PBulletPool.GetBullet();
             bullet.transform.position = bullet_position.transform.position;
         }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if(collision.gameObject.CompareTag("Ground"))
         {
             isJumping = false;
             onGround = true;
