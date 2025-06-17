@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class EnemyShoot : MonoBehaviour
 {
-    public Transform Ebullet_position;
+    [SerializeField] Transform[] Ebullet_position;
     public GameObject EnemyBullet;
     [SerializeField] private float coolTime = 1f;
     private float currentTime = 0;
@@ -18,6 +18,9 @@ public class EnemyShoot : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI clearScore;
     int currentScore;
+    private int currentUp = 0;
+    private int currentMiddle = 0;
+    private int currentDown = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -34,17 +37,42 @@ public class EnemyShoot : MonoBehaviour
         if(coolTime <= currentTime)
         {
             isAttack = true;
-            EnemyFire();
+            EnemyFire1();
+            EnemyFire2();
+            EnemyFire3();
             Debug.Log("АјАн");
             currentTime = 0;
         }
     }
 
-    void EnemyFire()
+    void EnemyFire1()
     {
-        GameObject bullet = Instantiate(EnemyBullet);
-        bullet.transform.position = Ebullet_position.transform.position;
+        for (int f = 0; f < 2; f++)
+        {
+            GameObject bullet = Instantiate(EnemyBullet);
+            bullet.transform.position = Ebullet_position[0].transform.position;
+        }
     }
+    
+    void EnemyFire2()
+    {
+        for (int f = 2; f < 5; f++)
+        {
+            GameObject bullet = Instantiate(EnemyBullet);
+            bullet.transform.position = Ebullet_position[1].transform.position;
+        }
+    }
+
+    void EnemyFire3()
+    {
+        for(int f = 5; f < 6; f++)
+        {
+            GameObject bullet = Instantiate(EnemyBullet);
+            bullet.transform.position = Ebullet_position[2].transform.position;
+        }
+    }
+
+
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
