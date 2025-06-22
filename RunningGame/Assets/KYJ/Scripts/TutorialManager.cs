@@ -10,6 +10,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] GameObject shootingImage;
     [SerializeField] Button runningButton;
     [SerializeField] Button shootingButton;
+    public static bool isTutorial = false;
 
     // Start is called before the first frame update
     void Start()
@@ -26,6 +27,9 @@ public class TutorialManager : MonoBehaviour
 
     void NextShooting()
     {
+        isTutorial = true;
+        DataManager.instance.player1.tutorialDone = isTutorial;
+        DataManager.instance.SaveData();
         SceneManager.LoadScene("LobbyScene");
     }
 }

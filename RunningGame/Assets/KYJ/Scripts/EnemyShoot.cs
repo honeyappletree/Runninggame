@@ -1,13 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using TMPro;
-using Unity.Android.Types;
 using UnityEngine;
 
 public class EnemyShoot : MonoBehaviour
 {
-    [SerializeField] Transform[] Ebullet_position;
-    public GameObject EnemyBullet;
     [SerializeField] private float coolTime = 1f;
     private float currentTime = 0;
     bool isAttack;
@@ -18,9 +16,13 @@ public class EnemyShoot : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI clearScore;
     int currentScore;
-    private int currentUp = 0;
-    private int currentMiddle = 0;
-    private int currentDown = 0;
+    [SerializeField] private GameObject lockStage;
+    [SerializeField] GameObject bulletPrefab;
+    float bulletSpeed = 10f;
+    [SerializeField] Transform topPoint;
+    [SerializeField] Transform bottomPoint;
+    [SerializeField] Transform forwardPoint;
+    public static bool unlockStage3 = false;
 
     // Start is called before the first frame update
     void Start()
@@ -28,6 +30,8 @@ public class EnemyShoot : MonoBehaviour
         currentTime = 0;
         currentHp = startHp;
         clearPanel.SetActive(false);
+        StartCoroutine(ShootLoop());
+        lockStage.SetActive(false);
     }
 
     // Update is called once per frame
@@ -37,42 +41,10 @@ public class EnemyShoot : MonoBehaviour
         if(coolTime <= currentTime)
         {
             isAttack = true;
-            EnemyFire1();
-            EnemyFire2();
-            EnemyFire3();
             Debug.Log("공격");
             currentTime = 0;
         }
     }
-
-    void EnemyFire1()
-    {
-        for (int f = 0; f < 2; f++)
-        {
-            GameObject bullet = Instantiate(EnemyBullet);
-            bullet.transform.position = Ebullet_position[0].transform.position;
-        }
-    }
-    
-    void EnemyFire2()
-    {
-        for (int f = 2; f < 5; f++)
-        {
-            GameObject bullet = Instantiate(EnemyBullet);
-            bullet.transform.position = Ebullet_position[1].transform.position;
-        }
-    }
-
-    void EnemyFire3()
-    {
-        for(int f = 5; f < 6; f++)
-        {
-            GameObject bullet = Instantiate(EnemyBullet);
-            bullet.transform.position = Ebullet_position[2].transform.position;
-        }
-    }
-
-
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -87,8 +59,38 @@ public class EnemyShoot : MonoBehaviour
                 currentScore += 250;
                 clearScore.text = currentScore.ToString();
                 scoreText.text = "250";
-
+                unlockStage3 = true;
             }
         }
+    }
+
+    IEnumerator ShootLoop()
+    {
+        while (currentHp > 0 && PlayerController.currentHp > 0)
+        {
+            // 위쪽 포인트 위치에서 위로 2발
+            for (int i = 0; i < 2; i++)
+            {
+                Shoot(topPoint.position, Vector3.left);
+                yield return new WaitForSeconds(0.3f);
+            }
+
+            // 아래쪽 포인트 위치에서 아래로 3발
+            for (int i = 0; i < 3; i++)
+            {
+                Shoot(bottomPoint.position, Vector3.left);
+                yield return new WaitForSeconds(0.3f);
+            }
+
+            // 가운데 포인트에서 정면으로 1발 (ex: Vector3.right)
+            Shoot(forwardPoint.position, Vector3.left);
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+    void Shoot(Vector3 spawnPos, Vector3 direction)
+    {
+        GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
+        bullet.GetComponent<EnemyBullet>().SetDirection(direction, bulletSpeed);
     }
 }

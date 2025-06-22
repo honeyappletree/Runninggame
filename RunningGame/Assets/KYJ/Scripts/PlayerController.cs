@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
     public Button Retry_btn;
     public Transform bullet_position;
     public Button Pause_btn;
-    int currentHp;
+    public static int currentHp;
     int maxHp = 5;
     int bulletDamage = 1;
     public Image[] Life;

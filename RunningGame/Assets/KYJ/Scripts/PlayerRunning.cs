@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using Unity.VisualScripting;
 
 public class PlayerRunning : MonoBehaviour
 {
@@ -27,22 +28,27 @@ public class PlayerRunning : MonoBehaviour
     public GameObject player;
     bool isSlide = false;
     bool isInvincible = true;
-    bool onSlope;
     SpriteRenderer sprite;
     float inputX;
-    int clearLeaves = 0;
+    public static int clearLeaves = 0;
     [SerializeField] private GameObject Clearpanel;
     [SerializeField] private GameObject[] GoldLeaves;
-    //[SerializeField] private GameObject slide_Position;
     [SerializeField] private TextMeshProUGUI GoldLeavesCount; //플레이 시 획득한 나뭇잎 갯수
     [SerializeField] private TextMeshProUGUI LastLeaves; //게임 클리어 시 뜨는 황금 나뭇잎 갯수
     [SerializeField] private TextMeshProUGUI ScoreText;
     [SerializeField] private TextMeshProUGUI lastScoreText; //최종 점수 텍스트
-    
-    public static int addScore;
+    [SerializeField] private TextMeshProUGUI bestScoreText;
+    [SerializeField] private Button okButton;
+    public static bool unlockStage2 = false;
+
+    int addScore = 0;
     bool isGiant = false;
     bool isSpeed = false;
 
+    private void Awake()
+    {
+        addScore = 0;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -50,6 +56,7 @@ public class PlayerRunning : MonoBehaviour
         Quit_btn.onClick.AddListener(Quit);
         Retry_btn.onClick.AddListener(Retry);
         Pause_btn.onClick.AddListener(Stop);
+        okButton.onClick.AddListener(ClickButton);
         Pause.SetActive(false);
         currentHp = maxHp;
         hpValue = Hpbar_front.GetComponent<Image>();
@@ -84,6 +91,16 @@ public class PlayerRunning : MonoBehaviour
                 isSlide = false;
             }
         }
+    }
+
+    public void StartGame()
+    {
+        addScore = 0;
+        clearLeaves = 0;
+
+        ScoreText.text = "0";
+        GoldLeavesCount.text = "0";
+        bestScoreText.text = DataManager.instance.player1.bestScore1.ToString();
     }
 
     void Stop()
@@ -156,6 +173,30 @@ public class PlayerRunning : MonoBehaviour
                 }
 
             }
+            if(isInvincible == true && gameObject.layer == 8 && other.CompareTag("Obstacle"))
+            {
+                Obstacle _obstacle = other.GetComponent<Obstacle>();
+                if (_obstacle != null)
+                {
+                    _obstacle.PlayAnim();
+                    Debug.Log("장애물이 날아갔습니다.");
+                    addScore += 50;
+                    ScoreText.text = addScore.ToString();
+                    Debug.Log("점수: " + addScore);
+                }
+            }
+            if(gameObject.layer == 7 && other.CompareTag("Obstacle"))
+            {
+                Obstacle _obstacle = other.GetComponent<Obstacle>();
+                if (_obstacle != null)
+                {
+                    _obstacle.PlayAnim();
+                    Debug.Log("장애물이 날아갔습니다.");
+                    addScore += 50;
+                    ScoreText.text = addScore.ToString();
+                    Debug.Log("점수: " + addScore);
+                }
+            }
         }
 
         else if (other.gameObject.CompareTag("Precipice"))
@@ -173,12 +214,26 @@ public class PlayerRunning : MonoBehaviour
             GoldLeavesCount.text = clearLeaves.ToString();
             addScore += 10;
             ScoreText.text = addScore.ToString();
+            DataManager.instance.player1.countLeaves1 = clearLeaves;
 
-            if (clearLeaves == 5)
+            int prevScore = DataManager.instance.player1.bestScore1;
+            if (prevScore == 0 || addScore > prevScore)
+            {
+                DataManager.instance.player1.bestScore1 = addScore;
+                DataManager.instance.SaveData();
+                bestScoreText.text = addScore.ToString();
+            }
+            else
+            {
+                bestScoreText.text = prevScore.ToString();
+            }
+
+            if (clearLeaves >= 5)
             {
                 Clearpanel.SetActive(true);
                 LastLeaves.text = clearLeaves.ToString();
                 lastScoreText.text = addScore.ToString();
+                unlockStage2 = true;
                 Time.timeScale = 0f;
             }
         }
@@ -187,19 +242,43 @@ public class PlayerRunning : MonoBehaviour
         {
             currentHp += 10;
             hpValue.fillAmount = currentHp / maxHp;
+            other.gameObject.SetActive(false);
             Debug.Log(currentHp);
         }
 
         else if(other.gameObject.CompareTag("SpeedPotion"))
         {
+            other.gameObject.SetActive(false);
             StartCoroutine(PlayerSpeedUP());
             StopCoroutine(Invincible());
         }
 
         else if(other.gameObject.CompareTag("GiantItem"))
         {
+            other.gameObject.SetActive(false);
             StartCoroutine(PlayerGiant());
             StopCoroutine(Invincible());
+        }
+
+        if (other.gameObject.CompareTag("Finish"))
+        {
+            Clearpanel.SetActive(true);
+            LastLeaves.text = clearLeaves.ToString();
+            lastScoreText.text = addScore.ToString();
+
+            int prevScore = DataManager.instance.player1.bestScore1;
+            if (prevScore == 0 || addScore > prevScore)
+            {
+                DataManager.instance.player1.bestScore1 = addScore;
+                DataManager.instance.SaveData();
+                bestScoreText.text = addScore.ToString();
+            }
+            else
+            {
+                bestScoreText.text = prevScore.ToString();
+            }
+
+            Time.timeScale = 0;
         }
     }
 
@@ -233,12 +312,13 @@ public class PlayerRunning : MonoBehaviour
         currentHp -= 0;
         Debug.Log("hp: " + currentHp);
         this.transform.localScale = new Vector3(1.1f, 2.5f, 1);
-        this.transform.localPosition = new Vector3(-9.0774f, -1.124f, 0);
+        this.transform.localPosition = new Vector3(-0.02740002f, 1.4f, 0);
         yield return new WaitForSeconds(5.0f);
         Debug.Log("무적 상태로 이어졌음.");
         gameObject.layer = 8;
         sprite.color = new Color(0, 0.9294f, 1, 0.7f);
         this.transform.localScale = new Vector3(0.9f, 1.1f, 1);
+        this.transform.localPosition = new Vector3(-0.02740002f, 0.7f, 0);
         yield return new WaitForSeconds(3f); //3초 동안 유지
         sprite.color = new Color(0, 0.9294f, 1, 1);
         gameObject.layer = 7;
@@ -302,38 +382,18 @@ public class PlayerRunning : MonoBehaviour
     {
         if (onGround == true && Input.GetKey(KeyCode.S))
         {
-            this.transform.localScale = new Vector3(0.9f, 1.3f, 1);
-            this.transform.localPosition = new Vector3(-9.0774f, -1.62f, 0);
+            this.transform.localScale = new Vector3(0.9f, 0.9f, 1);
+            this.transform.localPosition = new Vector3(-0.02740002f, 0.6f, 0);
         }
         if (onGround == true && Input.GetKeyUp(KeyCode.S))
         {
-            this.transform.localScale = new Vector3(0.9f, 2.3f, 1);
-            this.transform.localPosition = new Vector3(-9.0774f, -1.124f, 0);
+            this.transform.localScale = new Vector3(0.9f, 1.1f, 1);
+            this.transform.localPosition = new Vector3(-0.02740002f, 0.72f, 0);
         }
         else if (onGround == false && Input.GetKey(KeyCode.S))
         {
-            this.transform.localScale = new Vector3(0.9f, 2.3f, 1);
+            this.transform.localScale = new Vector3(0.9f, 1.1f, 1);
         }
-        if (onSlope == true && Input.GetKey(KeyCode.S))
-        {
-            this.transform.localScale = new Vector3(0.5f, 2.3f, 1);
-            this.transform.localRotation = Quaternion.Euler(0, 0, 135);
-        }
-        if (onSlope == true && Input.GetKeyUp(KeyCode.S))
-        {
-            this.transform.localPosition = new Vector3(-9.0774f, -0.43f, 0);
-            this.transform.localScale = new Vector3(0.9f, 2.3f, 1);
-        }
-        if (onSlope == false && Input.GetKey(KeyCode.S))
-        {
-            this.transform.localPosition = new Vector3(-9.22f, 0.87f, 0);
-            this.transform.localScale = new Vector3(0.9f, 1.3f, 1);
-        }
-        if (onSlope == false && Input.GetKeyUp(KeyCode.S))
-        {
-
-        }
-
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -346,35 +406,35 @@ public class PlayerRunning : MonoBehaviour
             isSlide = true;
             this.transform.localRotation = Quaternion.identity;
         }
-
-        //if (collision.gameObject.CompareTag("Slope"))
-        //{
-        //    isJumping = false;
-        //    onSlope = true;
-        //    jumpCount = 0;
-        //    isSlide = true;
-        //    this.transform.localRotation = Quaternion.Euler(0, 0, 45);
-        //}
-
-        //if (collision.gameObject.CompareTag("UnSlope"))
-        //{
-        //    isJumping = false;
-        //    jumpCount = 0;
-        //    isSlide = true;
-        //    onSlope = false;
-        //    this.transform.localRotation = Quaternion.identity;
-        //    this.transform.localPosition = new Vector3(-9.22f, 0.91f, 0);
-        //}
     }
 
     void GameOver()
     {
-        if(currentHp == 0)
+        if (currentHp == 0)
         {
             Clearpanel.SetActive(true);
             LastLeaves.text = clearLeaves.ToString();
             lastScoreText.text = addScore.ToString();
+
+            int prevScore = DataManager.instance.player1.bestScore1;
+            if (prevScore == 0 || addScore > prevScore)
+            {
+                DataManager.instance.player1.bestScore1 = addScore;
+                DataManager.instance.SaveData();
+                bestScoreText.text = addScore.ToString();
+            }
+            else
+            {
+                bestScoreText.text = prevScore.ToString();
+            }
+
             Time.timeScale = 0f;
         }
+    }
+
+    void ClickButton()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene("StartScene");
     }
 }

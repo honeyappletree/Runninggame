@@ -4,7 +4,14 @@ using UnityEngine;
 
 public class EnemyBullet : MonoBehaviour
 {
-    public int speed = 10;
+    private Vector3 moveDir;
+    private float speed;
+
+    public void SetDirection(Vector3 dir, float spd)
+    {
+        moveDir = dir.normalized;
+        speed = spd;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -15,7 +22,10 @@ public class EnemyBullet : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(Vector3.left * speed * Time.deltaTime);
+        transform.position += moveDir * speed * Time.deltaTime;
     }
 
+    
 }
+
+
